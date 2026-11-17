@@ -166,12 +166,46 @@ table.leads .motivo { color: var(--texto-suave); font-size: 12px; max-width: 320
 .metodo { display: block; font-size: 11px; color: var(--texto-suave); margin-top: 4px; }
 
 /* ---------- Kanban CRM ---------- */
-.kanban { display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 8px; }
-.coluna { background: #ececec; border-radius: 16px; padding: 12px; min-height: 260px; }
-.coluna h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.4px; margin: 2px 6px 12px; color: var(--cinza); display: flex; justify-content: space-between; }
-.cartao { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); }
-.cartao h3 { margin: 0 0 2px; font-size: 14px; }
-.cartao p { margin: 0; font-size: 12px; color: var(--texto-suave); line-height: 1.45; }
-.cartao .linha { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; }
-.cartao select { height: 30px; border-radius: var(--raio); border: 1px solid var(--borda); font: inherit; font-size: 12px; padding: 0 10px; }
-.cartao button { height: 30px; border-radius: var(--raio); border: 0; background: var(--verde); color: #fff; font: inherit; font-size: 12px; font-weight: 600; padding: 0 12px; cursor: pointer; }
+.kanban { display: grid; grid-template-columns: repeat(5, minmax(230px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
+.coluna {
+  background: #ebebeb; border-radius: 16px; padding: 12px; min-height: 420px;
+  border-top: 4px solid #bdbdbd; transition: background 0.15s, box-shadow 0.15s;
+}
+.coluna-novo { border-top-color: var(--frio); }
+.coluna-contato { border-top-color: var(--morno); }
+.coluna-proposta { border-top-color: #8e6cc2; }
+.coluna-ganho { border-top-color: var(--verde); }
+.coluna-perdido { border-top-color: var(--erro); }
+.coluna.alvo { background: var(--verde-claro); box-shadow: inset 0 0 0 2px var(--verde); }
+.coluna h2 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 2px 4px 12px; color: var(--cinza);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.contador { background: #fff; border-radius: var(--raio); padding: 2px 9px; font-size: 12px; }
+.coluna-vazia {
+  border: 2px dashed #cfcfcf; border-radius: 12px; padding: 22px 10px; text-align: center;
+  font-size: 12px; color: #999;
+}
+.cartao {
+  background: #fff; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); cursor: grab; overflow: hidden;
+  transition: box-shadow 0.15s, opacity 0.15s, transform 0.15s;
+}
+.cartao:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+.cartao:active { cursor: grabbing; }
+.cartao.arrastando { opacity: 0.4; transform: scale(0.98); }
+.cartao-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.cartao h3 { margin: 0; font-size: 14px; line-height: 1.3; }
+.cartao-topo .selo { font-size: 11px; padding: 2px 8px; flex-shrink: 0; }
+.cartao p { margin: 0; font-size: 12px; color: var(--texto-suave); line-height: 1.5; overflow-wrap: anywhere; }
+.cartao .cartao-empresa { color: var(--texto); font-weight: 600; }
+.cartao .cartao-contato { font-size: 11.5px; }
+.cartao-rodape {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0;
+}
+.cartao-rodape span { font-size: 11px; color: #999; }
+.cartao-rodape select {
+  height: 28px; border-radius: var(--raio); border: 1px solid var(--borda); background: #fafafa;
+  font: inherit; font-size: 11px; padding: 0 8px; cursor: pointer; max-width: 110px;
+}
