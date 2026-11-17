@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'GoHobby · Fale com um especialista',
-  description: 'Case prático de automação de leads (dados fictícios).',
+  description: 'Fale com um especialista GoHobby.',
   robots: { index: false, follow: false },
 };
 

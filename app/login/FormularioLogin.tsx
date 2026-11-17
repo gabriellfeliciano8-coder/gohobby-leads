@@ -51,7 +51,6 @@ export default function FormularioLogin() {
         {pendente ? 'Entrando…' : 'Entrar no painel'}
         {!pendente && <Icone nome="seta" cor="#1D1D1F" espessura={2.5} />}
       </button>
-      <p className="nota" style={{ textAlign: 'center' }}>Projeto acadêmico · dados fictícios · sessão protegida</p>
     </form>
   );
 }

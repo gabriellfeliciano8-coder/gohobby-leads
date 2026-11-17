@@ -29,10 +29,6 @@ export default function Home() {
         </section>
         <FormularioLead />
       </main>
-
-      <footer className="rodape-publico">
-        Case prático de automação e IA · Projeto acadêmico em parceria com a GoHobby · Utilize apenas dados fictícios.
-      </footer>
     </div>
   );
 }
