@@ -150,14 +150,21 @@ button { font: inherit; }
 .menu .marca { font-size: 28px; padding: 0 10px; }
 .menu { transition: flex-basis .2s, max-width .2s, padding .2s; }
 .menu-cabeca { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.marca-mini { display: none; width: 44px; height: 44px; border-radius: 14px; background: var(--preto-2); border: 1px solid var(--grafite); place-items: center; font-size: 18px; font-weight: 800; letter-spacing: -1px; color: var(--verde); text-decoration: none; }
 .recolher { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; border: 1px solid var(--grafite); background: transparent; display: grid; place-items: center; cursor: pointer; }
 .recolher:hover { border-color: var(--lime); }
-.app.recolhido .menu { flex: 0 0 84px; max-width: 84px; padding: 28px 14px; align-items: center; }
-.app.recolhido .menu .marca, .app.recolhido .menu-texto, .app.recolhido .menu-titulo, .app.recolhido .menu-item svg { flex-shrink: 0; }
-.menu-item .contagem { display: none; }
-.app.recolhido .menu-cabeca { justify-content: center; }
-.app.recolhido .menu-item { width: 52px; justify-content: center; padding: 0; }
-.app.recolhido .menu-usuario { flex-direction: column; padding: 10px; gap: 10px; }
+.menu-item svg { flex-shrink: 0; }
+/* Menu recolhido: só ícones */
+.app.recolhido .menu { flex: 0 0 84px; max-width: 84px; padding: 24px 0; align-items: center; gap: 22px; }
+.app.recolhido .menu .marca,
+.app.recolhido .menu-texto,
+.app.recolhido .menu-titulo,
+.app.recolhido .menu-item .contagem { display: none; }
+.app.recolhido .marca-mini { display: grid; }
+.app.recolhido .menu-cabeca { flex-direction: column; gap: 12px; }
+.app.recolhido .menu-grupo { align-items: center; }
+.app.recolhido .menu-item { width: 52px; height: 52px; justify-content: center; padding: 0; border-radius: 16px; }
+.app.recolhido .menu-usuario { flex-direction: column; padding: 10px 8px; gap: 10px; border-radius: 18px; }
 .app.recolhido .menu-usuario form { margin-left: 0; }
 .menu-grupo { display: flex; flex-direction: column; gap: 6px; }
 .menu-titulo { margin: 0 10px 6px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8a8a90; }
@@ -283,3 +290,21 @@ table.leads tbody tr:hover { background: #fcfcfd; }
 .chip-pessoa.ativo { background: var(--preto); border-color: var(--preto); color: #f5f5f7; }
 .chip-pessoa.sem { padding: 0 14px; border-style: dashed; border-color: #b4b4ba; background: transparent; color: var(--texto-2); }
 .chip-pessoa.sem.ativo { background: var(--preto); color: #f5f5f7; border-style: solid; }
+
+/* Filtros nas colunas da tabela */
+.th-filtro { position: relative; display: inline-block; }
+.th-filtro summary { list-style: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 8px; padding: 4px 6px; margin: -4px -6px; user-select: none; }
+.th-filtro summary::-webkit-details-marker { display: none; }
+.th-filtro summary:hover { background: #ededf0; color: var(--texto); }
+.th-filtro.aplicado summary { color: var(--verde-texto); }
+.th-filtro.aplicado summary::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--verde); }
+.th-filtro[open] summary { background: var(--preto); color: #f5f5f7; }
+.th-menu { position: absolute; top: calc(100% + 8px); left: -6px; z-index: 30; min-width: 220px; background: var(--preto); border-radius: 16px; padding: 8px; box-shadow: 0 18px 40px rgba(0, 0, 0, .28); display: flex; flex-direction: column; gap: 2px; text-transform: none; letter-spacing: 0; }
+.th-menu span { padding: 8px 10px 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8a8a90; }
+.th-menu a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px; border-radius: 10px; color: #f5f5f7; text-decoration: none; font-size: 13px; font-weight: 600; }
+.th-menu a:hover { background: #2a2a2e; }
+.th-menu a.atual { background: #2a2a2e; color: var(--lime); }
+.th-menu hr { border: 0; border-top: 1px solid var(--grafite); margin: 4px 6px; }
+.tabela-caixa { overflow: visible; }
+.tabela-rolagem { overflow-x: auto; border-radius: 22px; }
+.tabela-rolagem:has(details[open]) { overflow: visible; }

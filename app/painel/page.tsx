@@ -23,7 +23,20 @@ type Lead = {
   motivo: string | null;
 };
 
-type Filtros = { status?: string; classificacao?: string; q?: string };
+type Filtros = { status?: string; classificacao?: string; metodo?: string; ordem?: string; q?: string };
+
+// Ordenações disponíveis nos cabeçalhos das colunas
+const ORDENS: Record<string, { coluna: string; asc: boolean; rotulo: string }> = {
+  recentes: { coluna: 'created_at', asc: false, rotulo: 'Mais recentes primeiro' },
+  antigos: { coluna: 'created_at', asc: true, rotulo: 'Mais antigos primeiro' },
+  nome_az: { coluna: 'nome', asc: true, rotulo: 'Nome A → Z' },
+  nome_za: { coluna: 'nome', asc: false, rotulo: 'Nome Z → A' },
+  empresa_az: { coluna: 'empresa', asc: true, rotulo: 'Empresa A → Z' },
+  empresa_za: { coluna: 'empresa', asc: false, rotulo: 'Empresa Z → A' },
+  score_maior: { coluna: 'score', asc: false, rotulo: 'Maior score primeiro' },
+  score_menor: { coluna: 'score', asc: true, rotulo: 'Menor score primeiro' },
+};
+const METODOS: Record<string, string> = { ia: 'IA (Gemini)', regra: 'Regra fixa' };
 
 const COR_STATUS: Record<string, string> = {
   crm: '#83B540',
@@ -63,6 +76,8 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
   const filtros: Filtros = {
     status: bruto.status && bruto.status in STATUS ? bruto.status : undefined,
     classificacao: bruto.classificacao && bruto.classificacao in CLASSIFICACOES ? bruto.classificacao : undefined,
+    metodo: bruto.metodo && bruto.metodo in METODOS ? bruto.metodo : undefined,
+    ordem: bruto.ordem && bruto.ordem in ORDENS && bruto.ordem !== 'recentes' ? bruto.ordem : undefined,
     // Remove caracteres que alteram a sintaxe do filtro
     q: (bruto.q ?? '').replace(/[%,()*\\]/g, ' ').trim().slice(0, 80) || undefined,
   };
@@ -70,8 +85,10 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
   let consulta = supabase
     .from('leads')
     .select('id, created_at, nome, email, telefone, empresa, cargo, classificacao, score, metodo_classificacao, status, motivo')
+    .order(ORDENS[filtros.ordem ?? 'recentes'].coluna, { ascending: ORDENS[filtros.ordem ?? 'recentes'].asc, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(500);
+  if (filtros.metodo) consulta = consulta.eq('metodo_classificacao', filtros.metodo);
   if (filtros.status) consulta = consulta.eq('status', filtros.status);
   if (filtros.classificacao) consulta = consulta.eq('classificacao', filtros.classificacao);
   if (filtros.q) consulta = consulta.or(`nome.ilike.%${filtros.q}%,email.ilike.%${filtros.q}%,empresa.ilike.%${filtros.q}%`);
@@ -89,7 +106,16 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
   });
   const total = resumo?.length ?? 0;
   const lista = (leads ?? []) as Lead[];
-  const filtrando = Boolean(filtros.status || filtros.classificacao || filtros.q);
+  const filtrando = Boolean(filtros.status || filtros.classificacao || filtros.metodo || filtros.ordem || filtros.q);
+  const ordemAtual = filtros.ordem ?? 'recentes';
+
+  // Item de menu do filtro de coluna (link que aplica o filtro/ordenação)
+  const opcao = (rotulo: string, mudanca: Partial<Filtros>, atual: boolean) => (
+    <Link key={rotulo} href={urlCom(filtros, mudanca)} className={atual ? 'atual' : ''} aria-current={atual ? 'true' : undefined}>
+      {rotulo}
+      {atual && <Icone nome="ok" tamanho={14} cor="#BAE150" espessura={2.4} />}
+    </Link>
+  );
 
   return (
     <AreaRestrita ativo="leads">
@@ -105,6 +131,8 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
             <input id="q" name="q" type="search" placeholder="Buscar nome, e-mail ou empresa" defaultValue={filtros.q ?? ''} maxLength={80} />
             {filtros.status && <input type="hidden" name="status" value={filtros.status} />}
             {filtros.classificacao && <input type="hidden" name="classificacao" value={filtros.classificacao} />}
+            {filtros.metodo && <input type="hidden" name="metodo" value={filtros.metodo} />}
+            {filtros.ordem && <input type="hidden" name="ordem" value={filtros.ordem} />}
             <button className="btn btn-lime" type="submit">Buscar</button>
           </form>
           <Link href={urlCom(filtros, {})} className="btn btn-preto btn-sm">
@@ -153,6 +181,16 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
             </Link>
           );
         })}
+        {filtros.metodo && (
+          <Link href={urlCom(filtros, { metodo: undefined })} className="chip">
+            Método: {METODOS[filtros.metodo]} <Icone nome="fechar" tamanho={14} cor="#BAE150" espessura={2.5} />
+          </Link>
+        )}
+        {filtros.ordem && (
+          <Link href={urlCom(filtros, { ordem: undefined })} className="chip">
+            {ORDENS[filtros.ordem].rotulo} <Icone nome="fechar" tamanho={14} cor="#BAE150" espessura={2.5} />
+          </Link>
+        )}
         {filtros.q && (
           <Link href={urlCom(filtros, { q: undefined })} className="chip">
             Busca: “{filtros.q}” <Icone nome="fechar" tamanho={14} cor="#BAE150" espessura={2.5} />
@@ -171,15 +209,69 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
         ) : lista.length === 0 ? (
           <div className="vazio">{filtrando ? 'Nenhum lead encontrado com esses filtros.' : 'Nenhum lead recebido ainda. Envie um pelo formulário público.'}</div>
         ) : (
+          <div className="tabela-rolagem">
           <table className="leads">
             <thead>
               <tr>
-                <th>Lead</th>
-                <th>Empresa · Cargo</th>
-                <th>Classificação</th>
-                <th>Status final</th>
+                <th>
+                  <details className={`th-filtro${filtros.ordem?.startsWith('nome') ? ' aplicado' : ''}`}>
+                    <summary>Lead <Icone nome="filtro" tamanho={13} /></summary>
+                    <div className="th-menu">
+                      <span>Ordenar</span>
+                      {opcao('Nome A → Z', { ordem: 'nome_az' }, ordemAtual === 'nome_az')}
+                      {opcao('Nome Z → A', { ordem: 'nome_za' }, ordemAtual === 'nome_za')}
+                    </div>
+                  </details>
+                </th>
+                <th>
+                  <details className={`th-filtro${filtros.ordem?.startsWith('empresa') ? ' aplicado' : ''}`}>
+                    <summary>Empresa · Cargo <Icone nome="filtro" tamanho={13} /></summary>
+                    <div className="th-menu">
+                      <span>Ordenar</span>
+                      {opcao('Empresa A → Z', { ordem: 'empresa_az' }, ordemAtual === 'empresa_az')}
+                      {opcao('Empresa Z → A', { ordem: 'empresa_za' }, ordemAtual === 'empresa_za')}
+                    </div>
+                  </details>
+                </th>
+                <th>
+                  <details className={`th-filtro${filtros.classificacao || filtros.metodo || filtros.ordem?.startsWith('score') ? ' aplicado' : ''}`}>
+                    <summary>Classificação <Icone nome="filtro" tamanho={13} /></summary>
+                    <div className="th-menu">
+                      <span>Temperatura</span>
+                      {opcao('Todas', { classificacao: undefined }, !filtros.classificacao)}
+                      {Object.entries(CLASSIFICACOES).map(([v, r]) => opcao(r, { classificacao: v }, filtros.classificacao === v))}
+                      <hr />
+                      <span>Método</span>
+                      {opcao('Todos', { metodo: undefined }, !filtros.metodo)}
+                      {Object.entries(METODOS).map(([v, r]) => opcao(r, { metodo: v }, filtros.metodo === v))}
+                      <hr />
+                      <span>Ordenar</span>
+                      {opcao('Maior score primeiro', { ordem: 'score_maior' }, ordemAtual === 'score_maior')}
+                      {opcao('Menor score primeiro', { ordem: 'score_menor' }, ordemAtual === 'score_menor')}
+                    </div>
+                  </details>
+                </th>
+                <th>
+                  <details className={`th-filtro${filtros.status ? ' aplicado' : ''}`}>
+                    <summary>Status final <Icone nome="filtro" tamanho={13} /></summary>
+                    <div className="th-menu">
+                      <span>Status</span>
+                      {opcao('Todos', { status: undefined }, !filtros.status)}
+                      {Object.entries(STATUS).map(([v, r]) => opcao(r, { status: v }, filtros.status === v))}
+                    </div>
+                  </details>
+                </th>
                 <th>Detalhe</th>
-                <th>Recebido em</th>
+                <th>
+                  <details className={`th-filtro${filtros.ordem === 'antigos' ? ' aplicado' : ''}`}>
+                    <summary>Recebido em <Icone nome="filtro" tamanho={13} /></summary>
+                    <div className="th-menu" style={{ left: 'auto', right: -6 }}>
+                      <span>Ordenar</span>
+                      {opcao('Mais recentes primeiro', { ordem: undefined }, ordemAtual === 'recentes')}
+                      {opcao('Mais antigos primeiro', { ordem: 'antigos' }, ordemAtual === 'antigos')}
+                    </div>
+                  </details>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -221,6 +313,7 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </section>
     </AreaRestrita>

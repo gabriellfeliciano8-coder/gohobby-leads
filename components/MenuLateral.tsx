@@ -45,6 +45,7 @@ export default function MenuLateral({ ativo, totalLeads, totalCrm, children }: P
             <span className="go">go</span>
             <span className="hobby">hobby</span>
           </Link>
+          <Link href="/painel" className="marca-mini" aria-label="gohobby — painel">go</Link>
           <button
             type="button"
             className="recolher"
