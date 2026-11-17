@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Icone from './Icone';
 
 type Estado =
   | { tipo: 'ocioso' }
@@ -10,11 +11,11 @@ type Estado =
   | { tipo: 'falha'; mensagem: string; erros?: string[] };
 
 const CAMPOS = [
-  { nome: 'nome', rotulo: 'Nome', tipo: 'text', autocomplete: 'name', max: 120 },
-  { nome: 'email', rotulo: 'E-mail', tipo: 'email', autocomplete: 'email', max: 254 },
-  { nome: 'telefone', rotulo: 'DDD + Telefone', tipo: 'tel', autocomplete: 'tel', max: 30 },
-  { nome: 'empresa', rotulo: 'Empresa', tipo: 'text', autocomplete: 'organization', max: 120 },
-  { nome: 'cargo', rotulo: 'Cargo', tipo: 'text', autocomplete: 'organization-title', max: 80 },
+  { nome: 'nome', rotulo: 'Nome', tipo: 'text', dica: 'Seu nome completo', autocomplete: 'name', max: 120, inteira: true },
+  { nome: 'email', rotulo: 'E-mail corporativo', tipo: 'email', dica: 'voce@empresa.com.br', autocomplete: 'email', max: 254, inteira: false },
+  { nome: 'telefone', rotulo: 'Telefone com DDD', tipo: 'tel', dica: '(11) 99999-9999', autocomplete: 'tel', max: 30, inteira: false },
+  { nome: 'empresa', rotulo: 'Empresa', tipo: 'text', dica: 'Nome da empresa', autocomplete: 'organization', max: 120, inteira: false },
+  { nome: 'cargo', rotulo: 'Cargo', tipo: 'text', dica: 'Seu cargo', autocomplete: 'organization-title', max: 80, inteira: false },
 ] as const;
 
 export default function FormularioLead() {
@@ -43,11 +44,7 @@ export default function FormularioLead() {
       } else if (r.status === 409) {
         setEstado({ tipo: 'aviso', mensagem: corpo.mensagem ?? 'Já recebemos um cadastro com este e-mail.' });
       } else {
-        setEstado({
-          tipo: 'falha',
-          mensagem: corpo.mensagem ?? 'Não foi possível enviar. Tente novamente.',
-          erros: corpo.erros,
-        });
+        setEstado({ tipo: 'falha', mensagem: corpo.mensagem ?? 'Não foi possível enviar. Tente novamente.', erros: corpo.erros });
       }
     } catch {
       setEstado({ tipo: 'falha', mensagem: 'Sem conexão. Verifique sua internet e tente novamente.' });
@@ -57,21 +54,27 @@ export default function FormularioLead() {
   const enviando = estado.tipo === 'enviando';
 
   return (
-    <form ref={formRef} className="form" onSubmit={enviar} noValidate aria-describedby="retorno">
-      {CAMPOS.map((c) => (
-        <div className="campo" key={c.nome}>
-          <label htmlFor={c.nome}>{c.rotulo}</label>
-          <input
-            id={c.nome}
-            name={c.nome}
-            type={c.tipo}
-            placeholder={c.rotulo}
-            autoComplete={c.autocomplete}
-            maxLength={c.max}
-            disabled={enviando}
-          />
-        </div>
-      ))}
+    <form ref={formRef} className="form-lead" onSubmit={enviar} noValidate aria-describedby="retorno">
+      <h2>Seus dados</h2>
+
+      <div className="form-grade">
+        {CAMPOS.map((c) => (
+          <div className={`campo${c.inteira ? ' inteira' : ''}`} key={c.nome}>
+            <label htmlFor={c.nome}>{c.rotulo}</label>
+            <div className="entrada">
+              <input
+                id={c.nome}
+                name={c.nome}
+                type={c.tipo}
+                placeholder={c.dica}
+                autoComplete={c.autocomplete}
+                maxLength={c.max}
+                disabled={enviando}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Campo invisível anti-robô: pessoas não veem nem preenchem */}
       <div className="honeypot" aria-hidden="true">
@@ -79,41 +82,39 @@ export default function FormularioLead() {
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <button className="botao" type="submit" disabled={enviando}>
-        {enviando ? 'Enviando…' : 'Enviar'}
+      <button className="btn btn-lime" type="submit" disabled={enviando}>
+        {enviando ? 'Enviando…' : 'Quero falar com um especialista'}
+        {!enviando && <Icone nome="seta" cor="#1D1D1F" espessura={2.5} />}
       </button>
 
       <div id="retorno" aria-live="polite">
         {estado.tipo === 'sucesso' && (
           <div className="alerta sucesso" role="status">
-            <strong>Envio concluído</strong>
-            {estado.mensagem}
+            <Icone nome="ok" tamanho={20} cor="#3D6312" espessura={2.2} />
+            <div><strong>Recebemos seus dados!</strong>{estado.mensagem.replace('Recebemos seus dados! ', '')}</div>
           </div>
         )}
         {estado.tipo === 'aviso' && (
           <div className="alerta aviso" role="status">
-            <strong>Cadastro já existente</strong>
-            {estado.mensagem}
+            <Icone nome="alerta" tamanho={20} cor="#7A4E00" espessura={2.2} />
+            <div><strong>Cadastro já existente</strong>{estado.mensagem}</div>
           </div>
         )}
         {estado.tipo === 'falha' && (
           <div className="alerta falha" role="alert">
-            <strong>Não foi possível enviar</strong>
-            {estado.mensagem}
-            {estado.erros && estado.erros.length > 0 && (
-              <ul>
-                {estado.erros.map((erro) => (
-                  <li key={erro}>{erro}</li>
-                ))}
-              </ul>
-            )}
+            <Icone nome="alerta" tamanho={20} cor="#A32014" espessura={2.2} />
+            <div>
+              <strong>Não foi possível enviar</strong>
+              {estado.mensagem}
+              {estado.erros && estado.erros.length > 0 && (
+                <ul>{estado.erros.map((erro) => <li key={erro}>{erro}</li>)}</ul>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      <p className="privacidade">
-        Seus dados são usados apenas para retorno comercial. Este é um projeto acadêmico: utilize somente dados fictícios.
-      </p>
+      <p className="nota">Seus dados são usados apenas para retorno comercial. Projeto acadêmico: utilize somente dados fictícios.</p>
     </form>
   );
 }

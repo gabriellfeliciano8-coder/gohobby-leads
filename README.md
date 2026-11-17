@@ -9,8 +9,8 @@ Aplicação web do case prático de Automação e IA: formulário público de ca
 | `/` | Público | Formulário com nome, e-mail, telefone, empresa e cargo. Informa se o envio deu certo ou falhou e lista os erros de validação retornados pelo fluxo. |
 | `/api/lead` | Público (mesma origem) | Repassa o lead ao webhook do n8n adicionando o token no servidor. O navegador nunca vê o token. |
 | `/login` | Público | Login com o usuário `gohobby`. |
-| `/painel` | Restrito | Lista de leads com data e hora, dados, classificação (com método IA ou regra fixa), status final e motivo. Filtros e indicadores. |
-| `/crm` | Restrito | Kanban do CRM simulado, alimentado pelo fluxo n8n. |
+| `/painel` | Restrito | Lista de leads com data e hora, dados, classificação (IA ou regra fixa), status final e motivo. Indicadores clicáveis filtram a lista; filtros por classificação e busca. |
+| `/crm` | Restrito | Kanban do CRM simulado: arrastar e soltar entre etapas, atribuir responsável da equipe comercial, filtrar por responsável e atalhos de WhatsApp e e-mail. |
 
 Formulário, fluxo e painel compartilham a mesma fonte de dados: a tabela `leads` no Supabase, gravada pelo n8n.
 
@@ -21,6 +21,10 @@ Formulário (/) → /api/lead (servidor, adiciona token) → Webhook n8n → Sup
                                                                          ↑
                                          Painel (/painel, /crm) ← leitura autenticada (RLS)
 ```
+
+## Visual
+
+Identidade inspirada no site da GoHobby: fundo escuro `#1D1D1F`, verde `#83B540` e lime `#BAE150`, fonte Montserrat e cantos arredondados. Botões em lime com texto escuro para manter o contraste de leitura. O ícone da aba é original (não é o logo da GoHobby).
 
 ## Segurança
 

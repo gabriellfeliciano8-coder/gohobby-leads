@@ -9,7 +9,10 @@ export type EstadoLogin = { erro?: string };
 const USUARIO_PERMITIDO = 'gohobby';
 
 export async function entrar(_anterior: EstadoLogin, formData: FormData): Promise<EstadoLogin> {
-  const usuario = String(formData.get('usuario') ?? '').trim().toLowerCase();
+  // Aceita "gohobby" ou o e-mail completo "gohobby@<dominio>"
+  const dominio = process.env.LOGIN_EMAIL_DOMAIN ?? 'exemplo.com';
+  let usuario = String(formData.get('usuario') ?? '').trim().toLowerCase();
+  if (usuario.endsWith(`@${dominio}`)) usuario = usuario.slice(0, -(dominio.length + 1));
   const senha = String(formData.get('senha') ?? '');
 
   // Mensagem genérica: não revela se o usuário ou a senha é que estão errados
@@ -17,7 +20,6 @@ export async function entrar(_anterior: EstadoLogin, formData: FormData): Promis
 
   if (usuario !== USUARIO_PERMITIDO || !senha || senha.length > 200) return erroGenerico;
 
-  const dominio = process.env.LOGIN_EMAIL_DOMAIN ?? 'exemplo.com';
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: `${usuario}@${dominio}`,
