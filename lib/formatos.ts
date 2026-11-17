@@ -33,3 +33,8 @@ const formatador = new Intl.DateTimeFormat('pt-BR', {
 export function dataHora(iso: string) {
   return formatador.format(new Date(iso));
 }
+
+// Confere se a chave existe no próprio objeto (ignora propriedades herdadas como "constructor")
+export function chaveValida<T extends object>(obj: T, chave: unknown): chave is keyof T & string {
+  return typeof chave === 'string' && Object.hasOwn(obj, chave);
+}

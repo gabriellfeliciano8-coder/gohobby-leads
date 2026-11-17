@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { ETAPAS } from '@/lib/formatos';
+import { ETAPAS, chaveValida } from '@/lib/formatos';
 
 export type Resultado = { ok: boolean };
 
@@ -19,7 +19,7 @@ const idValido = (id: unknown): id is number => typeof id === 'number' && Number
 // Chamada pelo kanban ao soltar um card em outra coluna
 export async function moverEtapa(id: number, etapa: string): Promise<Resultado> {
   const supabase = await usuarioLogado();
-  if (!supabase || !idValido(id) || !(etapa in ETAPAS)) return { ok: false };
+  if (!supabase || !idValido(id) || !chaveValida(ETAPAS, etapa)) return { ok: false };
 
   // O banco só permite ao usuário logado alterar etapa, observação e responsável
   const { error } = await supabase.from('crm_oportunidades').update({ etapa }).eq('id', id);

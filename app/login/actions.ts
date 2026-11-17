@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { dominioLogin } from '@/lib/env';
 
 export type EstadoLogin = { erro?: string };
 
@@ -10,8 +11,8 @@ const USUARIO_PERMITIDO = 'gohobby';
 
 export async function entrar(_anterior: EstadoLogin, formData: FormData): Promise<EstadoLogin> {
   // Aceita "gohobby" ou o e-mail completo "gohobby@<dominio>"
-  const dominio = process.env.LOGIN_EMAIL_DOMAIN ?? 'exemplo.com';
-  let usuario = String(formData.get('usuario') ?? '').trim().toLowerCase();
+  const dominio = dominioLogin();
+  let usuario = String(formData.get('usuario') ?? '').trim().toLowerCase().slice(0, 120);
   if (usuario.endsWith(`@${dominio}`)) usuario = usuario.slice(0, -(dominio.length + 1));
   const senha = String(formData.get('senha') ?? '');
 

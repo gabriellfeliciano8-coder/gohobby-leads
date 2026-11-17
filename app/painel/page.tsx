@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import AreaRestrita from '@/components/AreaRestrita';
 import Icone from '@/components/Icone';
 import { createClient } from '@/lib/supabase/server';
-import { CLASSIFICACOES, STATUS, dataHora } from '@/lib/formatos';
+import { CLASSIFICACOES, STATUS, dataHora, chaveValida } from '@/lib/formatos';
 
 export const metadata = { title: 'GoHobby · Leads recebidos' };
 export const dynamic = 'force-dynamic';
@@ -74,12 +74,12 @@ export default async function Painel({ searchParams }: { searchParams: Promise<F
 
   const bruto = await searchParams;
   const filtros: Filtros = {
-    status: bruto.status && bruto.status in STATUS ? bruto.status : undefined,
-    classificacao: bruto.classificacao && bruto.classificacao in CLASSIFICACOES ? bruto.classificacao : undefined,
-    metodo: bruto.metodo && bruto.metodo in METODOS ? bruto.metodo : undefined,
-    ordem: bruto.ordem && bruto.ordem in ORDENS && bruto.ordem !== 'recentes' ? bruto.ordem : undefined,
-    // Remove caracteres que alteram a sintaxe do filtro
-    q: (bruto.q ?? '').replace(/[%,()*\\]/g, ' ').trim().slice(0, 80) || undefined,
+    status: chaveValida(STATUS, bruto.status) ? bruto.status : undefined,
+    classificacao: chaveValida(CLASSIFICACOES, bruto.classificacao) ? bruto.classificacao : undefined,
+    metodo: chaveValida(METODOS, bruto.metodo) ? bruto.metodo : undefined,
+    ordem: chaveValida(ORDENS, bruto.ordem) && bruto.ordem !== 'recentes' ? bruto.ordem : undefined,
+    // Remove caracteres que alteram a sintaxe do filtro do PostgREST
+    q: (typeof bruto.q === 'string' ? bruto.q : '').replace(/[%,()*\\"'.:]/g, ' ').trim().slice(0, 80) || undefined,
   };
 
   let consulta = supabase
