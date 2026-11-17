@@ -114,7 +114,6 @@ export default function FormularioLead() {
         )}
       </div>
 
-      <p className="nota">Seus dados são usados apenas para retorno comercial. Projeto acadêmico: utilize somente dados fictícios.</p>
     </form>
   );
 }
