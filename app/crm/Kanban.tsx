@@ -183,6 +183,7 @@ export default function Kanban({ iniciais, equipe }: { iniciais: Oportunidade[];
                       <div className="cartao-rodape" data-menu-atribuir>
                         <button
                           type="button"
+                          title={resp ? `Responsável: ${resp.nome}` : 'Atribuir responsável'}
                           className={`responsavel-btn${resp ? '' : ' vazio'}`}
                           aria-haspopup="menu"
                           aria-expanded={menuAberto === o.id}
@@ -191,12 +192,12 @@ export default function Kanban({ iniciais, equipe }: { iniciais: Oportunidade[];
                           {resp ? (
                             <>
                               <span className="avatar-pessoa" style={{ background: resp.cor, color: corTexto(resp.cor) }}>{resp.iniciais}</span>
-                              {resp.nome}
+                              <span className="rotulo">{resp.nome}</span>
                             </>
                           ) : (
                             <>
                               <Icone nome="mais" tamanho={14} cor="#3D6312" espessura={2.4} />
-                              Atribuir responsável
+                              <span className="rotulo">Atribuir</span>
                             </>
                           )}
                         </button>

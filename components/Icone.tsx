@@ -15,6 +15,8 @@ const CAMINHOS: Record<string, React.ReactNode> = {
   fechar: (<path d="M6 6l12 12M18 6L6 18" />),
   mais: (<path d="M12 5v14M5 12h14" />),
   whatsapp: (<path d="M21 12a9 9 0 0 1-13.5 7.8L3 21l1.2-4.5A9 9 0 1 1 21 12z" />),
+  recolher: (<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16M16 10l-2 2 2 2" /></>),
+  expandir: (<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16M14 10l2 2-2 2" /></>),
   email: (<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>),
 };
 
